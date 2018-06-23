@@ -3,16 +3,18 @@ import ReactDOM from "react-dom";
 
 class App extends React.Component {
   initialState = {
-    power: 0,
-    readers: 0
+    game: {
+      power: 0,
+      readers: 0
+    }
   };
   state = {};
   componentWillMount() {
     let savegame = JSON.parse(localStorage.getItem("save"));
     if (savegame && typeof savegame.power != "undefined") {
-      this.setState(savegame);
+      this.setState({ lastUpdate: Date.now(), lastSave: Date.now(), game: savegame});
     } else {
-      this.setState({ lastUpdate: Date.now(), ...this.initialState});
+      this.setState({ lastUpdate: Date.now(), lastSave: Date.now(), ...this.initialState});
     }
   }
   componentDidMount(){
@@ -20,15 +22,17 @@ class App extends React.Component {
     this.tick();
   }
   readerCost() {
-    return Math.floor(10 * Math.pow(1.35, this.state.readers));
+    return Math.floor(10 * Math.pow(1.35, this.state.game.readers));
   }
   buypower(){
-    if(this.readerCost() <= this.state.power){
-      this.setState({readers: this.state.readers + 1, power: this.state.power - this.readerCost()});
+    if(this.readerCost() <= this.state.game.power){
+      this.setState({game: {readers: this.state.game.readers + 1, power: this.state.game.power - this.readerCost()}});
     }
   }
   addpower(power = 1){
-    this.setState({ power: this.state.power + power })
+    let game = {...this.state.game};
+    game.power = this.state.game.power + power;
+    this.setState({ game })
   }
   tick(){
     let thisUpdate = Date.now();
@@ -40,32 +44,32 @@ class App extends React.Component {
     }
     const nextSecond = 1000 - thisUpdate % 1000
     this.timer = setTimeout(this.tick.bind(this), nextSecond * delta);
-    this.addpower((this.state.readers * .1 + 1) * delta);
+    this.addpower((this.state.game.readers * .1 + 1) * delta);
 
     this.setState({ lastUpdate: Date.now()});
   }
   save() {
     // todo: polyfill this once everythings in a set STATE (get it)
-    localStorage.setItem('save', JSON.stringify(this.state));
+    this.setState({lastSave: Date.now()}, () => localStorage.setItem('save', JSON.stringify(this.state.game)));
   }
   unsave() {
     // todo: polyfill this once everythings in a set STATE (get it)
-    localStorage.removeItem('save', JSON.stringify(this.state));
-    this.setState({ lastUpdate: Date.now(), ...this.initialState });
+    localStorage.removeItem('save');
+    this.setState({ lastUpdate: Date.now(), lastSave: Date.now(), game: this.initialState });
   }
   render() {
     return (
     <Fragment>
       <button onClick={this.addpower.bind(this, 1)}>add 1 power</button>
       <br />
-      <button onClick={this.buypower.bind(this, 1)} disabled={this.readerCost() > this.state.power}>split 1 reader for {this.readerCost()} power</button>
+      <button onClick={this.buypower.bind(this, 1)} disabled={this.readerCost() > this.state.game.power}>split 1 reader for {this.readerCost()} power</button>
       <br />
       <button onClick={this.save.bind(this)}>save game</button>
       <br />
       <button onClick={this.unsave.bind(this)}>delete save</button>
       {/* on real display, prettify */}
-      <div>you have: {this.state.power} power</div>
-      <div>you have: {this.state.readers} readers</div>
+      <div>you have: {this.state.game.power} power</div>
+      <div>you have: {this.state.game.readers} readers</div>
     </Fragment>);
   }
 }

@@ -8,7 +8,7 @@ export const actions = { START_TICK, SAVE, UNSAVE, LOAD, UPDATE };
 
 export function save() {
     return (dispatch, getState) => {
-        const { game } = getState;
+        const { game } = getState();
         // todo: polyfill this once everythings in a set STATE (get it)
         localStorage.setItem('save', JSON.stringify(game));
         dispatch({
@@ -29,8 +29,9 @@ export function unsave() {
 
 export function load() {
     return (dispatch) => {
-        let savegame = JSON.parse(localStorage.getItem("save"));
-        if (savegame && typeof savegame.power != "undefined") {
+        let save = localStorage.getItem("save");
+        if (save) {
+            let savegame = JSON.parse(save);
             dispatch({type: load, savegame})
         }
     }

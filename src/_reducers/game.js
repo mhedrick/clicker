@@ -1,5 +1,5 @@
 import { ADD_POWER, BUY_POWER } from '../_actions/game';
-import { LOAD } from '../_actions/engine';
+import { actions } from '../_actions/engine';
 
 const initialState = {
     power: 0,
@@ -17,8 +17,10 @@ export const game = (state = initialState, action) => {
                 readers: state.readers + action.amount,
                 power: state.power - action.cost
             });
-        case LOAD:
+        case actions.LOAD:
             return Object.assign({}, state, action.game);
+        case actions.UNSAVE:
+            return Object.assign({}, state, initialState);
         default:
             return state;
     }

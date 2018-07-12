@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from "react";
+import React, { Component, Fragment } from "react";
 import ReactDOM from "react-dom";
 import { createStore, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux'
@@ -13,7 +13,7 @@ class App extends Component {
   componentWillMount() {
     this.props.load();
   }
-  componentDidMount(){
+  componentDidMount() {
     //start global tick
     this.tick();
   }
@@ -21,16 +21,17 @@ class App extends Component {
     // You can also log the error to an error reporting service
     console.log(error, info);
   }
-  readerCost() { 
+  readerCost() {
     return Math.floor(10 * Math.pow(1.35, this.props.game.readers));
   }
-  tick(){
+  tick() {
     let thisUpdate = Date.now();
     // find the seconds since the last update
     let delta = Math.round((thisUpdate - this.props.engine.lastUpdate) / 1000);
+    console.log(delta, '|', (thisUpdate - this.props.engine.lastUpdate) / 1000);
     // force updates to only happen in second intervals, nothing faster
-    if (delta < 1){
-        delta = 1;
+    if (delta < 1) {
+      delta = 1;
     }
     const nextSecond = 1000 - thisUpdate % 1000
     this.timer = setTimeout(this.tick.bind(this), nextSecond);
@@ -38,18 +39,25 @@ class App extends Component {
   }
   render() {
     return (
-    <Fragment>
-      <button onClick={this.props.onAddClick}>add 1 power</button>
-      <br />
-      <button onClick={this.props.onBuyClick} disabled={this.readerCost() > this.props.game.power}>split 1 reader for {this.readerCost()} power</button>
-      <br />
-      <button onClick={this.props.onSaveClick}>save game</button>
-      <br />
-      <button onClick={this.props.onDeleteClick}>delete save</button>
-      {/* on real display, prettify */}
-      <div>you have: {this.props.game.power.toFixed(2)} power</div>
-      <div>you have: {this.props.game.readers} readers</div>
-    </Fragment>);
+      <Fragment>
+        <div>
+          {/* on real display, prettify */}
+          <div>you have: {this.props.game.power.toFixed(2)} units</div>
+          <div>you have: {this.props.game.readers} generators</div>
+        </div>
+        <div style={{ display: 'flex', marginBottom: '5px' }}>
+          <button onClick={this.props.onAddClick}>add 1 unit</button>
+          <button onClick={this.props.onBuyClick} disabled={this.readerCost() > this.props.game.power}>add one generator for {this.readerCost()} power</button>
+          <button onClick={this.props.onSaveClick}>save game</button>
+          <button onClick={this.props.onDeleteClick}>delete save</button>
+        </div>
+        <h2>Debug</h2>
+        <div style={{ display: 'flex', marginBottom: '5px'  }}>
+          <button onClick={console.log} disabled>test notification</button>
+          <button onClick={console.log} disabled>test event</button>
+          <button onClick={console.log} disabled>hyper speed</button>
+        </div>
+      </Fragment>);
   }
 }
 
@@ -58,15 +66,15 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    load: () => dispatch(load()),
-    onBuyClick: () => dispatch(buyPower(1)),
-    onAddPower: (amount) => dispatch(addPower(amount)),
-    onAddClick: () => dispatch(addPower(1)),
-    onSaveClick: () => dispatch(save()),
-    onDeleteClick: () => dispatch(unsave())
-  });
+  load: () => dispatch(load()),
+  onBuyClick: () => dispatch(buyPower(1)),
+  onAddPower: (amount) => dispatch(addPower(amount)),
+  onAddClick: () => dispatch(addPower(1)),
+  onSaveClick: () => dispatch(save()),
+  onDeleteClick: () => dispatch(unsave())
+});
 
 const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
 
 var mountNode = document.getElementById("root");
-ReactDOM.render(<Provider store = {store}><ConnectedApp/></Provider>, mountNode);
+ReactDOM.render(<Provider store={store}><ConnectedApp /></Provider>, mountNode);

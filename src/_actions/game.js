@@ -1,4 +1,4 @@
-import {actions} from './engine';
+import { actions } from './engine';
 
 export const ADD_POWER = 'game.add_power';
 export const BUY_POWER = 'game.buy_power';
